@@ -286,3 +286,7 @@ input::placeholder {
     transform: translate(0, 0);
   }
 }
+
+/* .hidden {
+  display: none;
+} */
