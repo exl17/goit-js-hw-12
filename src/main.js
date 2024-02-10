@@ -30,7 +30,7 @@ function hideLoader() {
 async function performSearch(searchQuery) {
     showLoader();
     currentSearchQuery = searchQuery;
-    currentPage = 1; // Reset page number for new search
+    currentPage = 1;
     const imageType = 'photo';
     const orientation = 'horizontal';
     const safeSearch = true;
@@ -42,7 +42,7 @@ async function performSearch(searchQuery) {
         orientation: orientation,
         safesearch: safeSearch,
         per_page: 15,
-        page: currentPage // Specify the page parameter
+        page: currentPage
     });
     const URL = `https://pixabay.com/api/?${params}`;
 
@@ -95,7 +95,7 @@ async function performSearch(searchQuery) {
 
             imageContainer.appendChild(fragment);
             lightbox.refresh();
-            loadBtn.style.display = 'block'; // Show the load more button
+            loadBtn.style.display = 'block';
         } else {
             iziToast.error({
                 message: 'Please enter a valid search query.',
@@ -117,14 +117,14 @@ async function loadMoreImages() {
         orientation: 'horizontal',
         safesearch: true,
         per_page: 15,
-        page: currentPage // Increment the page number for subsequent requests
+        page: currentPage
     });
     const URL = `https://pixabay.com/api/?${params}`;
 
     try {
         const response = await axios.get(URL);
         const data = response.data;
-
+hideLoader();
         const fragment = document.createDocumentFragment();
 
         if (parseInt(data.totalHits) > 0) {
@@ -168,8 +168,23 @@ async function loadMoreImages() {
 
             imageContainer.appendChild(fragment);
             lightbox.refresh();
+         
+            if (currentPage * 15 >= parseInt(data.totalHits)) {
+                document.getElementById('loadBtn').style.display = 'none';
+                iziToast.error({
+                    message: "We're sorry, but you've reached the end of search results.",
+                    position: 'topRight',
+                });
+            }
+
+            const cardHeight = document.querySelector('.image-card').getBoundingClientRect().height;
+            window.scrollBy({
+                top: cardHeight * 2,
+                behavior: 'smooth'
+});
         }
     } catch (error) {
+        hideLoader();
         console.error('Error loading more images:', error.message);
     }
 }
@@ -182,7 +197,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const searchInputValue = document.getElementById('searchInput').value;
         if (searchInputValue.trim() !== '') {
             performSearch(searchInputValue);
-            loadBtn.style.display = 'none'; // Hide the load more button when initiating a new search
+            loadBtn.style.display = 'none';
         } else {
             iziToast.error({
                 message: 'Please enter a valid search query.',
@@ -192,5 +207,5 @@ document.addEventListener('DOMContentLoaded', function () {
 
         event.target.reset();
     });
-    loadBtn.style.display = 'none'; // Hide the load more button initially
+    loadBtn.style.display = 'none';
 });
